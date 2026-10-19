@@ -58,22 +58,24 @@
     document.getElementById("prov-igjen").addEventListener("click", () => location.reload());
   }
 
-  // Fem ruter i stedet for stjerner
-  function ruter(key, label, valgt, liten) {
-    let html = `<fieldset class="ruter${liten ? " liten" : ""}" data-for="${esc(key)}" data-verdi="${valgt || 0}"><legend>${esc(label)}</legend>`;
+  // Stjerner
+  const STJERNE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3.1-5.4 3.1 1.2-6L3.3 9.5l6.1-.7z" stroke-linejoin="round"/></svg>';
+  function stjerner(key, label, valgt, liten) {
+    let html = `<fieldset class="stjerner${liten ? " liten" : ""}" data-for="${esc(key)}" data-verdi="${valgt || 0}"><legend>${esc(label)}</legend>`;
     for (let i = 1; i <= 5; i++) {
-      html += `<button type="button" class="rute${valgt >= i ? " pa" : ""}" data-verdi="${i}" aria-label="${i} av 5" aria-pressed="${valgt === i}"></button>`;
+      html += `<button type="button" class="stjerne${valgt >= i ? " pa" : ""}" data-verdi="${i}" aria-label="${i} av 5 stjerner" aria-pressed="${valgt === i}">${STJERNE}</button>`;
     }
     return html + "</fieldset>";
   }
-  function settRuter(gruppe, verdi) {
-    gruppe.querySelectorAll(".rute").forEach((b) => {
+  function settStjerner(gruppe, verdi) {
+    gruppe.querySelectorAll(".stjerne").forEach((b) => {
       const v = Number(b.dataset.verdi);
       b.classList.toggle("pa", v <= verdi);
       b.setAttribute("aria-pressed", String(v === verdi));
     });
     gruppe.dataset.verdi = String(verdi);
   }
+  const vinNavn = (w) => `${esc(w.name)}${w.vintage ? ` <span class="aar">${esc(w.vintage)}</span>` : ""}`;
 
   // ---------- Dagens meny ----------
   async function dagensMeny() {
@@ -89,53 +91,33 @@
     try { mine = await hent(`/mine?client=${klient}&menu=${meny.id}`); } catch {}
     document.title = `${meny.title} – Guldberglia`;
 
-    const retter = meny.courses || [];
-    const antallViner = new Set(retter.flatMap((c) => (c.wines || []).map((w) => `${w.name}|${w.vintage}`))).size;
-    const datoTekst = dato(meny.event_date);
-
-    const kort = retter.map((c, i) => `
-      <li class="rett" id="rett-${c.position}" style="--i:${i}">
-        <div class="rett-topp">
-          <div><span class="nr">${nr(c.position)}</span>${c.course_type ? `<span class="type">${esc(c.course_type)}</span>` : ""}</div>
-          <h2>${esc(c.dish)}</h2>
-          ${c.description ? `<p class="beskrivelse">${esc(c.description)}</p>` : ""}
-          <div class="vurder">
-            ${ruter(String(c.id), `Din vurdering av ${c.dish}`, Number(mine[c.id] || 0))}
-            <span class="status" aria-live="polite"></span>
-          </div>
-        </div>
-        ${(c.wines || []).map((w) => `
-          <div class="vin">
-            <p class="vin-navn">${esc(w.name)}${w.vintage ? ` <span class="aar">${esc(w.vintage)}</span>` : ""}</p>
-            ${opphav(w) ? `<p class="vin-opphav">${esc(opphav(w))}</p>` : ""}
-            ${w.id ? `<div class="vurder">
-              ${ruter("w" + w.id, `Din vurdering av vinen ${w.name}`, Number(mine["w" + w.id] || 0), true)}
-              <span class="status" aria-live="polite"></span>
-            </div>` : ""}
-          </div>`).join("")}
+    const retter = (meny.courses || []).map((c) => `
+      <li class="rett">
+        ${c.course_type ? `<span class="type">${esc(c.course_type)}</span>` : ""}
+        <h2>${esc(c.dish)}</h2>
+        ${c.description ? `<p class="beskrivelse">${esc(c.description)}</p>` : ""}
+        ${stjerner(String(c.id), `Din vurdering av ${c.dish}`, Number(mine[c.id] || 0))}
+        <span class="status" aria-live="polite"></span>
+        ${(c.wines || []).map((w) => `<div class="vinblokk">
+          <p class="vin">${vinNavn(w)}${opphav(w) ? `<span class="opphav">${esc(opphav(w))}</span>` : ""}</p>
+          ${w.id ? `${stjerner("w" + w.id, `Din vurdering av vinen ${w.name}`, Number(mine["w" + w.id] || 0), true)}
+          <span class="status" aria-live="polite"></span>` : ""}
+        </div>`).join("")}
       </li>`).join("");
 
+    const datoTekst = dato(meny.event_date);
     main.innerHTML = `
-      <section class="side">
-        <header class="hode">
+      <article class="kort">
+        <header class="kort-hode">
           <h1>${esc(meny.title)}</h1>
-          <p class="h-meta">${datoTekst ? `<strong>${esc(datoTekst)}</strong>` : ""}${retter.length} retter${antallViner ? `, ${antallViner} viner` : ""}</p>
-          ${meny.intro ? `<p class="ingress">${esc(meny.intro)}</p>` : ""}
+          ${datoTekst || meny.occasion ? `<p class="dato">${esc([datoTekst, meny.occasion].filter(Boolean).join(", "))}</p>` : ""}
+          ${meny.intro ? `<p class="intro">${esc(meny.intro)}</p>` : ""}
         </header>
-        <div class="stripe">
-          <ol aria-label="Rettene">${retter.map((c) => `<li${mine[c.id] ? ' class="vurdert"' : ""} data-for="${c.id}"><a href="#rett-${c.position}" title="${esc(`${nr(c.position)} ${c.dish}`)}">${esc(c.dish)}</a></li>`).join("")}</ol>
-          <span id="telling"></span>
-        </div>
-        <ol class="retter">${kort}</ol>
-      </section>`;
-
-    const telling = document.getElementById("telling");
-    const oppdaterTelling = () => {
-      const n = main.querySelectorAll(".stripe li.vurdert").length;
-      telling.textContent = n ? `${n} av ${retter.length} vurdert` : "Trykk på rutene for å vurdere rett og vin";
-    };
-    oppdaterTelling();
-    requestAnimationFrame(() => main.querySelector(".retter").classList.add("klar"));
+        <span class="ruter-tegn" aria-hidden="true"></span>
+        <ol class="retter">${retter}</ol>
+      </article>`;
+    const kortEl = main.querySelector(".kort");
+    requestAnimationFrame(() => kortEl.classList.add("klar"));
 
     async function send(body) {
       const res = await fetch(API + "/rate", {
@@ -148,16 +130,16 @@
       return data;
     }
 
-    main.querySelectorAll(".rett .ruter").forEach((gruppe) => {
+    main.querySelectorAll(".rett .stjerner").forEach((gruppe) => {
       const status = gruppe.nextElementSibling;
       let tidtaker;
       gruppe.addEventListener("click", async (ev) => {
-        const knapp = ev.target.closest(".rute");
+        const knapp = ev.target.closest(".stjerne");
         if (!knapp) return;
         const verdi = Number(knapp.dataset.verdi);
         const forrige = Number(gruppe.dataset.verdi || 0);
         const nokkel = gruppe.dataset.for;
-        settRuter(gruppe, verdi);
+        settStjerner(gruppe, verdi);
         gruppe.setAttribute("aria-busy", "true");
         status.classList.remove("feil");
         status.textContent = "";
@@ -166,13 +148,8 @@
           await send(nokkel.startsWith("w") ? { pairing_id: nokkel.slice(1), stars: verdi } : { course_id: nokkel, stars: verdi });
           status.textContent = "Lagret";
           tidtaker = setTimeout(() => { status.textContent = ""; }, 2500);
-          if (!nokkel.startsWith("w")) {
-            const li = main.querySelector(`.stripe li[data-for="${nokkel}"]`);
-            if (li) li.classList.add("vurdert");
-            oppdaterTelling();
-          }
         } catch (e) {
-          settRuter(gruppe, forrige);
+          settStjerner(gruppe, forrige);
           status.classList.add("feil");
           status.textContent = e.message;
         } finally {
@@ -183,31 +160,28 @@
   }
 
   // ---------- Tidligere menyer ----------
-  const snitt = (r) => (r && r.count ? `<span class="snitt">${tall1(r.avg)} av 5 (${r.count})</span>` : "");
+  const snitt = (r) => (r && r.count ? `<span class="snitt"><span class="s" aria-hidden="true">★</span> ${tall1(r.avg)}<span class="visuelt-skjult"> av 5</span> (${r.count})</span>` : "");
 
   async function arkiv() {
     let menyer;
     try { menyer = await hent("/archive"); } catch (e) { return feilside(e.message); }
 
-    const liste = menyer.length
+    const kortene = menyer.length
       ? menyer.map((m) => {
           const retter = m.courses || [];
           const meta = [dato(m.event_date, kortDato), `${retter.length} retter`].filter(Boolean).join(", ");
-          return `<li>
-            <details>
-              <summary>
-                <span class="a-nr">${nr(m.menu_no)}</span>
-                <span class="a-navn">${esc(m.title)}<span class="a-smak">${esc(retter.map((c) => c.dish).join(", "))}</span></span>
-                <span class="a-meta">${esc(meta)}${m.rating && m.rating.count ? `<br>${snitt(m.rating)}` : ""}</span>
-              </summary>
-              <ol class="arkivretter">
-                ${retter.map((c) => `<li>
-                  <span class="ar-nr">${nr(c.position)}</span> ${snitt(c.rating)}
-                  <span class="ar-navn">${esc(c.dish)}</span>
-                  ${(c.wines || []).map((w) => `<span class="ar-vin">${esc([w.name, w.vintage].filter(Boolean).join(" "))} ${snitt(w.rating)}</span>`).join("")}
-                </li>`).join("")}
-              </ol>
-            </details>
+          return `<li class="mk">
+            <header class="mk-hode">
+              <h2>${esc(m.title)}</h2>
+              <span class="mk-meta">${esc(meta)}${m.rating && m.rating.count ? `<br>${snitt(m.rating)}` : ""}</span>
+            </header>
+            <ol class="mk-retter">
+              ${retter.map((c) => `<li>
+                <span class="mk-rett">${esc(c.dish)}</span>
+                <span class="mk-snitt">${snitt(c.rating)}</span>
+                ${(c.wines || []).map((w) => `<span class="mk-vin">${vinNavn(w)}</span>`).join("")}
+              </li>`).join("")}
+            </ol>
           </li>`;
         }).join("")
       : `<li class="melding">Ingen tidligere menyer ennå.</li>`;
@@ -216,10 +190,9 @@
       <section class="side">
         <header class="hode">
           <h1>Tidligere menyer</h1>
-          <p class="h-meta"><strong>${menyer.length} menyer</strong>${menyer.reduce((n, m) => n + (m.courses || []).length, 0)} retter</p>
-          <p class="ingress">Alt som har stått på bordet. Åpne en meny for å se rettene, vinene og hva gjestene syntes.</p>
+          <p class="ingress">Alt som har stått på bordet, med vinene som ble servert.</p>
         </header>
-        <ul class="arkivliste">${liste}</ul>
+        <ol class="menykort">${kortene}</ol>
       </section>`;
   }
 
@@ -266,8 +239,7 @@
       <section class="side">
         <header class="hode">
           <h1>Vinene</h1>
-          <p class="h-meta"><strong>${alle.length} viner</strong>fra ${menyer} ${menyer === 1 ? "meny" : "menyer"}</p>
-          <p class="ingress">Alt som er servert til menyene, sortert etter hvor det kommer fra og hva det er laget av.</p>
+          <p class="ingress">${alle.length} viner servert til ${menyer} ${menyer === 1 ? "meny" : "menyer"}, sortert etter hvor de kommer fra og hva de er laget av.</p>
         </header>
 
         <dl class="nokkeltall">

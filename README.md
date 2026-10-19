@@ -6,7 +6,7 @@ Menykortet ved bordet: dagens meny med viner, gjestenes vurderinger, vinene fra 
 
 - `public/` – den statiske nettsiden (ingen byggesteg). Netlify publiserer denne mappen, se `netlify.toml`.
   - `index.html` – dagens meny; gjestene vurderer hver rett og hver vin (1–5)
-  - `arkiv.html` – tidligere menyer (`/arkiv`)
+  - `arkiv.html` – tidligere menyer som kompakte menykort med vinene (`/arkiv`)
   - `viner.html` – vinene som er servert til menyene, fordelt på region, drue, land og farge (`/viner`)
   - `config.js` – adressen til API-et
 - `api/index.mjs` – API-et, kjører som Neon Function `gourmetapi` i Neon-prosjektet `mat-og-vin`.
