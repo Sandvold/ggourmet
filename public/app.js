@@ -43,7 +43,7 @@
   const STJERNE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3.1-5.4 3.1 1.2-6L3.3 9.5l6.1-.7z" stroke-linejoin="round"/></svg>';
 
   function stjerneGruppe(navn, valgt) {
-    let html = `<fieldset class="stjerner" data-for="${esc(navn.key)}"><legend>${esc(navn.label)}</legend>`;
+    let html = `<fieldset class="stjerner${navn.liten ? " liten" : ""}" data-for="${esc(navn.key)}"><legend>${esc(navn.label)}</legend>`;
     for (let i = 1; i <= 5; i++) {
       html += `<button type="button" class="stjerne${valgt >= i ? " pa" : ""}" data-verdi="${i}" aria-label="${i} av 5 stjerner" aria-pressed="${valgt === i}">${STJERNE}</button>`;
     }
@@ -89,9 +89,13 @@
         ${c.course_type ? `<span class="type">${esc(c.course_type)}</span>` : ""}
         <h2 id="rett-${c.id}">${esc(c.dish)}</h2>
         ${c.description ? `<p class="beskrivelse">${esc(c.description)}</p>` : ""}
-        ${(c.wines || []).map(vinLinje).join("")}
         ${stjerneGruppe({ key: String(c.id), label: `Din vurdering av ${c.dish}` }, Number(mine[c.id] || 0))}
         <span class="status" aria-live="polite"></span>
+        ${(c.wines || []).map((w) => `<div class="vinblokk">
+          ${vinLinje(w)}
+          ${w.id ? `${stjerneGruppe({ key: "w" + w.id, label: `Din vurdering av vinen ${w.name}`, liten: true }, Number(mine["w" + w.id] || 0))}
+          <span class="status" aria-live="polite"></span>` : ""}
+        </div>`).join("")}
       </li>`).join("");
 
     const datoTekst = dato(meny.event_date);
@@ -107,7 +111,7 @@
         <span class="ruter" aria-hidden="true"></span>
         <section class="kvelden" aria-labelledby="kvelden-tittel">
           <h2 id="kvelden-tittel">Hvordan var kvelden?</h2>
-          <p class="hint">Trykk på stjernene under hver rett, eller gi en vurdering av hele menyen her.</p>
+          <p class="hint">Trykk på stjernene under hver rett og hver vin, eller gi en vurdering av hele menyen her.</p>
           <form id="helhet" novalidate>
             ${stjerneGruppe({ key: "menu", label: "Din vurdering av hele menyen" }, Number(mine.menu || 0))}
             <div class="felt">
@@ -151,7 +155,10 @@
         status.classList.remove("feil");
         status.textContent = "";
         try {
-          await send({ course_id: gruppe.dataset.for, stars: verdi });
+          const nokkel = gruppe.dataset.for;
+          await send(nokkel.startsWith("w")
+            ? { pairing_id: nokkel.slice(1), stars: verdi }
+            : { course_id: nokkel, stars: verdi });
           status.textContent = "Lagret";
         } catch (e) {
           settStjerner(gruppe, forrige);
@@ -220,7 +227,7 @@
                 ${retter.map((c) => `<li>
                   <span class="r-navn">${esc(c.dish)}</span>
                   <span class="r-snitt">${snitt(c.rating)}</span>
-                  ${(c.wines || []).map((w) => `<span class="r-vin">${esc([w.name, w.vintage].filter(Boolean).join(" "))}</span>`).join("")}
+                  ${(c.wines || []).map((w) => `<span class="r-vin">${esc([w.name, w.vintage].filter(Boolean).join(" "))}${w.rating && w.rating.count ? `<span class="r-vinsnitt">${snitt(w.rating)}</span>` : ""}</span>`).join("")}
                 </li>`).join("")}
               </ol>
             </details>

@@ -194,6 +194,12 @@ main { flex: 1; width: 100%; }
 .stjerner:hover .stjerne:hover ~ .stjerne { color: var(--messing-dim); }
 .stjerner:hover .stjerne:hover ~ .stjerne svg path { fill: none; }
 .stjerne:active { transform: scale(.88); }
+.vinblokk { margin-top: .2rem; }
+.vinblokk .vin { margin-top: 0; }
+.rett .status { min-height: 1.1em; }
+.stjerner.liten { margin-top: .35rem; }
+.stjerner.liten .stjerne { padding: .3rem; }
+.stjerner.liten .stjerne svg { width: 15px; height: 15px; }
 .stjerner[aria-busy="true"] { opacity: .6; pointer-events: none; }
 
 .status {
@@ -303,6 +309,7 @@ main { flex: 1; width: 100%; }
 }
 .arkivretter .r-navn { font-family: var(--serif); font-size: var(--step-1); line-height: 1.3; }
 .arkivretter .r-vin { grid-column: 1; font-family: var(--serif); font-style: italic; color: var(--messing); font-size: var(--step--1); }
+.arkivretter .r-vinsnitt { font-family: var(--sans); font-style: normal; color: var(--roeyk); margin-left: .5rem; white-space: nowrap; }
 .arkivretter .r-snitt { grid-row: 1; grid-column: 2; color: var(--roeyk); font-size: var(--step--1); white-space: nowrap; }
 
 .snitt-stjerne { color: var(--messing); }

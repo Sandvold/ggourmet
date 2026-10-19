@@ -19,9 +19,9 @@ Menykortet ved bordet: dagens meny med viner, gjestenes vurderinger og arkiv ove
 | GET | `/archive` | Alle andre menyer, nyeste først |
 | GET | `/menu/{id}` | Én meny |
 | GET | `/mine?client=…&menu=…` | Gjestens egne stjerner (for å vise dem igjen) |
-| POST | `/rate` | `{client_id, menu_id, course_id \| null, stars, comment?, guest_name?}` |
+| POST | `/rate` | `{client_id, menu_id, course_id?, pairing_id?, stars, comment?, guest_name?}` – rett, vin (pairing) eller hele menyen |
 
-Hver gjest har én vurdering per rett og én for hele menyen. En ny vurdering erstatter den forrige.
+Hver gjest har én vurdering per rett, én per vin og én for hele menyen. En ny vurdering erstatter den forrige.
 
 ## Hvilken meny vises som dagens meny?
 

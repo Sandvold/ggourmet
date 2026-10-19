@@ -72,6 +72,7 @@ const ERRORS = {
   ugyldig_klient: 'Ugyldig forespørsel.',
   ukjent_meny: 'Fant ikke menyen.',
   ukjent_rett: 'Fant ikke retten.',
+  ukjent_vin: 'Fant ikke vinen.',
   for_mange: 'Litt for mange vurderinger på kort tid – prøv igjen om et øyeblikk.',
 };
 
@@ -111,14 +112,16 @@ async function route(request) {
     try { b = await request.json(); } catch { return json({ error: 'Ugyldig forespørsel.' }, 400, h); }
     const menuId = Number.parseInt(b?.menu_id, 10);
     const courseId = b?.course_id == null || b.course_id === '' ? null : Number.parseInt(b.course_id, 10);
+    const pairingId = b?.pairing_id == null || b.pairing_id === '' ? null : Number.parseInt(b.pairing_id, 10);
     const stars = Number.parseInt(b?.stars, 10);
     const client = String(b?.client_id || '');
-    if (!Number.isFinite(menuId) || (courseId !== null && !Number.isFinite(courseId)) || !/^[A-Za-z0-9_-]{8,64}$/.test(client)) {
+    if (!Number.isFinite(menuId) || (courseId !== null && !Number.isFinite(courseId)) || (pairingId !== null && !Number.isFinite(pairingId)) || !/^[A-Za-z0-9_-]{8,64}$/.test(client)) {
       return json({ error: 'Ugyldig forespørsel.' }, 400, h);
     }
     try {
-      const [r] = await sql('SELECT api_rate($1, $2::bigint, $3::bigint, $4::int, $5, $6) AS d', [
-        client, String(menuId), courseId === null ? null : String(courseId), String(stars),
+      const [r] = await sql('SELECT api_rate($1, $2::bigint, $3::bigint, $4::bigint, $5::int, $6, $7) AS d', [
+        client, String(menuId), courseId === null ? null : String(courseId),
+        pairingId === null ? null : String(pairingId), String(stars),
         typeof b.comment === 'string' ? b.comment.slice(0, 500) : null,
         typeof b.guest_name === 'string' ? b.guest_name.slice(0, 60) : null,
       ]);
