@@ -7,6 +7,11 @@
   to = "/arkiv.html"
   status = 200
 
+[[redirects]]
+  from = "/viner"
+  to = "/viner.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]

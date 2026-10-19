@@ -7,6 +7,7 @@ Menykortet ved bordet: dagens meny med viner, gjestenes vurderinger og arkiv ove
 - `public/` – den statiske nettsiden (ingen byggesteg). Netlify publiserer denne mappen, se `netlify.toml`.
   - `index.html` – dagens meny med stjernevurdering per rett og for hele kvelden
   - `arkiv.html` – tidligere menyer (`/arkiv`)
+  - `viner.html` – alt vi har drukket, fordelt på region, drue, land og farge (`/viner`)
   - `config.js` – adressen til API-et
 - `api/index.mjs` – API-et, kjører som Neon Function `gourmetapi` i Neon-prosjektet `mat-og-vin`.
   Det kaller bare faste SQL-funksjoner i databasen (`api_today`, `api_archive`, `api_menu_json`, `api_rate`, `api_my_ratings`).
@@ -17,6 +18,7 @@ Menykortet ved bordet: dagens meny med viner, gjestenes vurderinger og arkiv ove
 | --- | --- | --- |
 | GET | `/today` | Dagens meny |
 | GET | `/archive` | Alle andre menyer, nyeste først |
+| GET | `/drunk` | Alle drukne flasker (CellarTracker «Consumed» + Vinmonopolet-viner fra menyene) |
 | GET | `/menu/{id}` | Én meny |
 | GET | `/mine?client=…&menu=…` | Gjestens egne stjerner (for å vise dem igjen) |
 | POST | `/rate` | `{client_id, menu_id, course_id?, pairing_id?, stars, comment?, guest_name?}` – rett, vin (pairing) eller hele menyen |
