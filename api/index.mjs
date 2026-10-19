@@ -95,7 +95,7 @@ async function route(request) {
     }
     if (path === '/drunk') {
       const [r] = await sql('SELECT api_drunk() AS d');
-      return json(r.d, 200, h, 'public, max-age=300');
+      return json(r.d, 200, h, 'public, max-age=60');
     }
     const m = path.match(/^\/menu\/(\d{1,9})$/);
     if (m) {
