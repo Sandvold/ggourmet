@@ -9,6 +9,9 @@ Menykortet ved bordet: dagens meny med viner, gjestenes vurderinger, vinene fra 
   - `arkiv.html` – tidligere menyer som kompakte menykort med vinene (`/arkiv`)
   - `viner.html` – vinene som er servert til menyene, fordelt på region, drue, land og farge (`/viner`)
   - `config.js` – adressen til API-et
+- `sync/index.mjs` – ukentlig synk fra CellarTracker (Neon Function `ctsync`).
+- `tools/preview.py` – skjermbilder av alle sidene med testdata: `python tools/preview.py` (krever `pip install playwright`).
+- `.github/workflows/deploy-functions.yml` – deployer `api/` og `sync/` til Neon ved push til main. Krever hemmeligheten `NEON_API_KEY`.
 - `api/index.mjs` – API-et, kjører som Neon Function `gourmetapi` i Neon-prosjektet `mat-og-vin`.
   Det kaller bare faste SQL-funksjoner i databasen (`api_today`, `api_archive`, `api_menu_json`, `api_rate`, `api_my_ratings`).
 

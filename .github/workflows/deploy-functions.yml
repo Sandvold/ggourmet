@@ -1,0 +1,66 @@
+# Deployer Neon Functions når koden deres endres på main.
+# Krever repo-hemmeligheten NEON_API_KEY (Settings → Secrets and variables → Actions).
+name: Deploy Neon Functions
+
+on:
+  push:
+    branches: [main]
+    paths: ["api/**", "sync/**", ".github/workflows/deploy-functions.yml"]
+  workflow_dispatch:
+
+env:
+  NEON_PROJECT: dawn-lab-85569680
+  NEON_BRANCH: br-muddy-thunder-ba9khwt4
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: gourmetapi
+            dir: api
+          - slug: ctsync
+            dir: sync
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Sjekk om ${{ matrix.dir }} er endret
+        id: endret
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || \
+             git diff --name-only HEAD^ HEAD | grep -qE '^(${{ matrix.dir }}/|\.github/workflows/deploy-functions\.yml)'; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Syntakssjekk
+        if: steps.endret.outputs.deploy == 'true'
+        run: node --check ${{ matrix.dir }}/index.mjs
+
+      - name: Pakk og deploy ${{ matrix.slug }}
+        if: steps.endret.outputs.deploy == 'true'
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$NEON_API_KEY" || { echo "::error::Mangler hemmeligheten NEON_API_KEY"; exit 1; }
+          zip -j function.zip ${{ matrix.dir }}/index.mjs
+          base="https://console.neon.tech/api/v2/projects/$NEON_PROJECT/branches/$NEON_BRANCH/functions/${{ matrix.slug }}"
+          curl -sS --fail-with-body -X POST "$base/deployments" \
+            -H "Authorization: Bearer $NEON_API_KEY" \
+            -F "zip=@function.zip" -F "runtime=nodejs24" | tee deploy.json
+          echo
+          for i in $(seq 1 30); do
+            status=$(curl -sS -H "Authorization: Bearer $NEON_API_KEY" "$base" \
+              | python3 -c 'import sys,json; d=json.load(sys.stdin); f=d.get("function",d); print((f.get("current_deployment") or {}).get("status",""))')
+            echo "status: $status"
+            [ "$status" = "completed" ] && exit 0
+            [ "$status" = "failed" ] && { echo "::error::Deploy av ${{ matrix.slug }} feilet"; exit 1; }
+            sleep 4
+          done
+          echo "::error::Tidsavbrudd for ${{ matrix.slug }}"; exit 1

@@ -2,3 +2,5 @@
 node_modules/
 .netlify/
 *.zip
+preview-out/
+__pycache__/
