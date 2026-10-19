@@ -310,6 +310,7 @@
               </tr>
             </thead>
             <tbody id="rader"></tbody>
+            <tfoot id="sum"></tfoot>
           </table>
         </div>
         <p class="tom" id="tom" hidden>Ingen viner passer søket.</p>
@@ -372,6 +373,15 @@
         <td data-l="Gjestene" class="tall">${r.rating_count ? `<span class="s">★</span> ${tall1(r.rating)} <span class="stemmer">(${r.rating_count})</span>` : ""}</td>
       </tr>`).join("");
       $("tom").hidden = rader.length > 0;
+      const medPrisRader = rader.filter((r) => r.price != null);
+      const total = medPrisRader.reduce((t, r) => t + r.price, 0);
+      const anslag = medPrisRader.some((r) => r.price_kind === "estimert");
+      const utenPris = rader.length - medPrisRader.length;
+      $("sum").innerHTML = rader.length ? `<tr>
+        <th scope="row" colspan="5">Totalt ${rader.length} ${rader.length === 1 ? "vin" : "viner"}${q ? " i søket" : ""}${utenPris ? `<span class="sum-merk">${utenPris} uten pris er ikke med</span>` : ""}</th>
+        <td class="tall" data-l="Totalt">${medPrisRader.length ? `${anslag ? "ca. " : ""}${kr(total)}` : "–"}</td>
+        <td></td>
+      </tr>` : "";
       document.querySelectorAll(".vintabell th").forEach((th) => {
         const b = th.querySelector("button");
         th.setAttribute("aria-sort", b.dataset.sort === k ? (d === 1 ? "ascending" : "descending") : "none");

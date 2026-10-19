@@ -264,6 +264,10 @@ input[type="search"] {
 .vintabell .v-navn { font-size: var(--s-0); font-weight: 500; }
 .vintabell .aar { color: var(--messing); white-space: nowrap; }
 .tom { color: var(--roeyk); text-align: center; margin: 2rem 0; }
+.vintabell tfoot th, .vintabell tfoot td { border-top: 1px solid var(--linje); border-bottom: 0; padding: .8rem .6rem .8rem 0; font-weight: 600; text-align: left; }
+.vintabell tfoot td.tall { text-align: right; color: var(--messing); font-size: var(--s-0); }
+.vintabell td[data-l="Meny"] { white-space: nowrap; }
+.sum-merk { display: block; font-weight: 400; color: var(--roeyk); font-size: var(--s--1); }
 
 /* ---------- Tilstander ---------- */
 .melding { max-width: 30rem; margin: 4rem auto; padding: 0 var(--side); text-align: center; color: var(--roeyk); }
@@ -301,7 +305,11 @@ input[type="search"] {
   .s-navn { grid-area: navn; } .s-spor { grid-area: spor; } .s-tall { grid-area: tall; } .s-pris { grid-area: pris; text-align: left; }
   .mk { padding: 1.15rem 1.1rem 1.2rem; }
   .vintabell thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  .vintabell, .vintabell tbody, .vintabell tr, .vintabell td { display: block; width: 100%; }
+  .vintabell, .vintabell tbody, .vintabell tfoot, .vintabell tr, .vintabell td, .vintabell tfoot th { display: block; width: 100%; }
+  .vintabell tfoot tr { border-top: 1px solid var(--linje); border-bottom: 0; padding: .9rem 0 0; }
+  .vintabell tfoot th, .vintabell tfoot td { border: 0; padding: 0; }
+  .vintabell tfoot td:empty { display: none; }
+  .vintabell tfoot td.tall { text-align: left; font-size: var(--s-1); margin: .2rem 0 0; color: var(--messing); }
   .vintabell tr { border-bottom: 1px solid var(--linje-svak); padding: .7rem 0; }
   .vintabell td { border: 0; padding: .05rem 0; text-align: left; }
   .vintabell td.tall { display: inline-block; width: auto; margin-right: 1rem; color: var(--roeyk); }
