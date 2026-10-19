@@ -82,7 +82,15 @@
     let meny;
     try { meny = await hent("/today"); } catch (e) { return feilside(e.message); }
     if (!meny || !meny.id) {
-      main.innerHTML = `<section class="melding"><h1>Ingen meny ennå</h1><p>Kvelden er ikke satt. Kom tilbake når menyen er klar.</p></section>`;
+      main.innerHTML = `
+        <article class="kort klar">
+          <header class="kort-hode">
+            <h1>TBD</h1>
+            <p class="dato">Neste meny er ikke satt ennå.</p>
+          </header>
+          <span class="ruter-tegn" aria-hidden="true"></span>
+          <p class="tbd-lenke"><a href="/arkiv">Se tidligere menyer</a></p>
+        </article>`;
       return;
     }
 

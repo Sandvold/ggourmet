@@ -27,7 +27,7 @@ Hver gjest har én vurdering per rett og én per vin. En ny vurdering erstatter 
 
 ## Hvilken meny vises som dagens meny?
 
-Menyen med `featured = true`. Hvis ingen er merket: menyen med høyest nummer.
+Menyen med `featured = true`. Hvis ingen er merket, viser forsiden «TBD» og alle menyene ligger i arkivet.
 
 ```sql
 UPDATE menus SET featured = (menu_no = 7);

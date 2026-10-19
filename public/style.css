@@ -297,3 +297,6 @@ input[type="search"] {
   .vintabell td.tall { display: inline-block; width: auto; margin-right: 1rem; color: var(--roeyk); }
   .vintabell td[data-l="Meny"] { color: var(--messing); font-weight: 600; }
 }
+
+.tbd-lenke { margin: 0; font-size: var(--s--1); }
+.tbd-lenke a { color: var(--messing); text-underline-offset: 3px; }
