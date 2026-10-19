@@ -58,22 +58,36 @@
     document.getElementById("prov-igjen").addEventListener("click", () => location.reload());
   }
 
-  // Stjerner
+  // Stjerner med halve trinn: venstre halvdel gir x,5, høyre halvdel gir hel stjerne
   const STJERNE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3.1-5.4 3.1 1.2-6L3.3 9.5l6.1-.7z" stroke-linejoin="round"/></svg>';
+  const tallTekst = (v) => String(v).replace(".", ",");
   function stjerner(key, label, valgt, liten) {
     let html = `<fieldset class="stjerner${liten ? " liten" : ""}" data-for="${esc(key)}" data-verdi="${valgt || 0}"><legend>${esc(label)}</legend>`;
     for (let i = 1; i <= 5; i++) {
-      html += `<button type="button" class="stjerne${valgt >= i ? " pa" : ""}" data-verdi="${i}" aria-label="${i} av 5 stjerner" aria-pressed="${valgt === i}">${STJERNE}</button>`;
+      const fyll = valgt >= i ? " hel" : valgt >= i - 0.5 ? " halv" : "";
+      html += `<span class="stjerne${fyll}">${STJERNE}<span class="fyll" aria-hidden="true">${STJERNE}</span>` +
+        `<button type="button" class="del v" data-verdi="${i - 0.5}" aria-label="${tallTekst(i - 0.5)} av 5 stjerner" aria-pressed="${valgt === i - 0.5}"></button>` +
+        `<button type="button" class="del h" data-verdi="${i}" aria-label="${i} av 5 stjerner" aria-pressed="${valgt === i}"></button></span>`;
     }
     return html + "</fieldset>";
   }
-  function settStjerner(gruppe, verdi) {
-    gruppe.querySelectorAll(".stjerne").forEach((b) => {
-      const v = Number(b.dataset.verdi);
-      b.classList.toggle("pa", v <= verdi);
-      b.setAttribute("aria-pressed", String(v === verdi));
+  function malStjerner(gruppe, verdi) {
+    gruppe.querySelectorAll(".stjerne").forEach((st, i) => {
+      st.classList.toggle("hel", verdi >= i + 1);
+      st.classList.toggle("halv", verdi >= i + 0.5 && verdi < i + 1);
     });
+  }
+  function settStjerner(gruppe, verdi) {
+    malStjerner(gruppe, verdi);
+    gruppe.querySelectorAll(".del").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.verdi) === verdi)));
     gruppe.dataset.verdi = String(verdi);
+  }
+  function forhandsvisning(gruppe) {
+    gruppe.addEventListener("pointerover", (ev) => {
+      const del = ev.target.closest(".del");
+      if (del && ev.pointerType === "mouse") malStjerner(gruppe, Number(del.dataset.verdi));
+    });
+    gruppe.addEventListener("pointerleave", () => malStjerner(gruppe, Number(gruppe.dataset.verdi || 0)));
   }
   const vinNavn = (w) => `${esc(w.name)}${w.vintage ? ` <span class="aar">${esc(w.vintage)}</span>` : ""}`;
 
@@ -141,8 +155,9 @@
     main.querySelectorAll(".rett .stjerner").forEach((gruppe) => {
       const status = gruppe.nextElementSibling;
       let tidtaker;
+      forhandsvisning(gruppe);
       gruppe.addEventListener("click", async (ev) => {
-        const knapp = ev.target.closest(".stjerne");
+        const knapp = ev.target.closest(".del");
         if (!knapp) return;
         const verdi = Number(knapp.dataset.verdi);
         const forrige = Number(gruppe.dataset.verdi || 0);
@@ -216,13 +231,14 @@
     const m = new Map();
     for (const r of rader) {
       const k = dim.verdi(r) || "Ukjent";
-      const g = m.get(k) || { navn: k, antall: 0, sum: 0, medPris: 0 };
+      const g = m.get(k) || { navn: k, antall: 0, sum: 0, medPris: 0, stjerner: 0, stemmer: 0 };
       g.antall++;
       if (r.price != null) { g.sum += r.price; g.medPris++; }
+      if (r.rating_count) { g.stjerner += r.rating * r.rating_count; g.stemmer += r.rating_count; }
       m.set(k, g);
     }
     return [...m.values()]
-      .map((g) => ({ ...g, snitt: g.medPris ? g.sum / g.medPris : null }))
+      .map((g) => ({ ...g, snitt: g.medPris ? g.sum / g.medPris : null, vurdering: g.stemmer ? g.stjerner / g.stemmer : null }))
       .sort((a, b) => b.antall - a.antall || a.navn.localeCompare(b.navn, "nb"));
   }
 
@@ -240,8 +256,11 @@
     const toppRegion = gruppe(alle, DIMENSJONER[0])[0];
     const toppDrue = gruppe(alle, DIMENSJONER[1])[0];
     const menyer = new Set(alle.map((r) => r.menu_no)).size;
+    const vurderte = alle.filter((r) => r.rating_count > 0);
+    const bestLikt = [...vurderte].sort((a, b) => b.rating - a.rating || b.rating_count - a.rating_count)[0];
+    const stjerneTekst = (v) => `${tall1(v)} av 5`;
 
-    const tilstand = { dim: "region", sok: "", sorter: "menu_no", retning: -1, visAlle: false };
+    const tilstand = { dim: "region", mal: "antall", sok: "", sorter: "menu_no", retning: -1, visAlle: false };
 
     main.innerHTML = `
       <section class="side">
@@ -254,11 +273,16 @@
           <div><dt>Mest servert fra</dt><dd>${esc(toppRegion ? toppRegion.navn : "–")}</dd></div>
           <div><dt>Vanligste drue</dt><dd>${esc(toppDrue ? toppDrue.navn : "–")}</dd></div>
           <div><dt>Snittpris per flaske</dt><dd>${snittPris ? `ca. ${kr(snittPris)}` : "–"}</dd></div>
+          <div><dt>Best likt av gjestene</dt><dd>${bestLikt ? `${esc(bestLikt.name)}${bestLikt.vintage ? ` ${bestLikt.vintage}` : ""}<span class="dd-sub">${stjerneTekst(bestLikt.rating)} (${bestLikt.rating_count})</span>` : "Ingen vurderinger ennå"}</dd></div>
         </dl>
 
         <div class="kontroller">
           <div class="valg" id="dim-valg" role="group" aria-label="Fordel etter">
             ${DIMENSJONER.map((d) => `<button type="button" data-dim="${d.key}" aria-pressed="${d.key === tilstand.dim}">${d.navn}</button>`).join("")}
+          </div>
+          <div class="valg" id="mal-valg" role="group" aria-label="Vis etter">
+            <button type="button" data-mal="antall" aria-pressed="true">Mest servert</button>
+            <button type="button" data-mal="vurdering" aria-pressed="false">Best likt</button>
           </div>
         </div>
         <ol class="stolper" id="stolper" aria-label="Antall viner"></ol>
@@ -282,6 +306,7 @@
                 <th scope="col"><button type="button" data-sort="region">Region</button></th>
                 <th scope="col" class="tall"><button type="button" data-sort="age">Alder</button></th>
                 <th scope="col" class="tall"><button type="button" data-sort="price">Pris</button></th>
+                <th scope="col" class="tall"><button type="button" data-sort="rating">Gjestene</button></th>
               </tr>
             </thead>
             <tbody id="rader"></tbody>
@@ -294,18 +319,29 @@
 
     function tegnStolper() {
       const dim = DIMENSJONER.find((d) => d.key === tilstand.dim);
-      const grupper = gruppe(alle, dim);
+      let grupper = gruppe(alle, dim);
+      const etterVurdering = tilstand.mal === "vurdering";
+      if (etterVurdering) {
+        grupper = grupper.filter((g) => g.vurdering != null)
+          .sort((a, b) => b.vurdering - a.vurdering || b.stemmer - a.stemmer || a.navn.localeCompare(b.navn, "nb"));
+      }
       const vis = tilstand.visAlle ? grupper : grupper.slice(0, 10);
       const maks = grupper[0] ? grupper[0].antall : 1;
-      $("stolper").innerHTML = vis.map((g) => {
+      $("stolper").setAttribute("aria-label", etterVurdering ? "Gjestenes snitt" : "Antall viner");
+      $("stolper").innerHTML = grupper.length ? vis.map((g) => {
         const andel = Math.round((g.antall / alle.length) * 100);
-        return `<li class="stolpe" title="${esc(`${g.navn}: ${g.antall} (${andel} %)${g.snitt ? `, snittpris ca. ${kr(g.snitt)}` : ""}`)}">
+        const bredde = etterVurdering ? (g.vurdering / 5) * 100 : (g.antall / maks) * 100;
+        const tall = etterVurdering
+          ? `<span class="s">★</span> ${tall1(g.vurdering)}<span class="s-andel">${g.stemmer} ${g.stemmer === 1 ? "stemme" : "stemmer"}</span>`
+          : `${g.antall}<span class="s-andel">${andel} %</span>`;
+        const ekstra = [g.snitt ? `ca. ${kr(g.snitt)}` : "", !etterVurdering && g.vurdering != null ? `★ ${tall1(g.vurdering)}` : ""].filter(Boolean);
+        return `<li class="stolpe">
           <span class="s-navn">${esc(g.navn)}</span>
-          <span class="s-spor" aria-hidden="true"><span class="s-fyll" style="width:${Math.max(2, (g.antall / maks) * 100)}%"></span></span>
-          <span class="s-tall">${g.antall}<span class="s-andel">${andel} %</span></span>
-          <span class="s-pris">${g.snitt ? `ca. ${kr(g.snitt)}` : ""}</span>
+          <span class="s-spor" aria-hidden="true"><span class="s-fyll" style="width:${Math.max(2, bredde)}%"></span></span>
+          <span class="s-tall">${tall}</span>
+          <span class="s-pris">${ekstra.map((e) => `<span>${esc(e)}</span>`).join("")}</span>
         </li>`;
-      }).join("");
+      }).join("") : `<li class="tom">Gjestene har ikke vurdert noen viner ennå. Vurderingene dukker opp her når de gir stjerner på dagens meny.</li>`;
       const knapp = $("vis-alle");
       knapp.hidden = grupper.length <= 10;
       knapp.textContent = tilstand.visAlle ? "Vis bare de ti største" : `Vis alle ${grupper.length}`;
@@ -333,6 +369,7 @@
         <td data-l="Region">${esc([no(r.region), r.appellation && r.appellation !== r.region ? r.appellation : null].filter(Boolean).join(", "))}</td>
         <td data-l="Alder" class="tall">${r.age != null ? `${r.age} år` : ""}</td>
         <td data-l="Pris" class="tall">${r.price != null ? `${r.price_kind === "estimert" ? "ca. " : ""}${kr(r.price)}` : ""}</td>
+        <td data-l="Gjestene" class="tall">${r.rating_count ? `<span class="s">★</span> ${tall1(r.rating)} <span class="stemmer">(${r.rating_count})</span>` : ""}</td>
       </tr>`).join("");
       $("tom").hidden = rader.length > 0;
       document.querySelectorAll(".vintabell th").forEach((th) => {
@@ -347,6 +384,14 @@
       tilstand.dim = b.dataset.dim;
       tilstand.visAlle = false;
       $("dim-valg").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      tegnStolper();
+    });
+    $("mal-valg").addEventListener("click", (ev) => {
+      const b = ev.target.closest("button[data-mal]");
+      if (!b) return;
+      tilstand.mal = b.dataset.mal;
+      tilstand.visAlle = false;
+      $("mal-valg").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
       tegnStolper();
     });
     $("vis-alle").addEventListener("click", () => { tilstand.visAlle = !tilstand.visAlle; tegnStolper(); });

@@ -68,7 +68,7 @@ function json(data, status, headers, cache) {
 }
 
 const ERRORS = {
-  ugyldig_stjerner: 'Velg mellom 1 og 5 stjerner.',
+  ugyldig_stjerner: 'Velg mellom en halv og fem stjerner.',
   ugyldig_klient: 'Ugyldig forespørsel.',
   ukjent_meny: 'Fant ikke menyen.',
   ukjent_rett: 'Fant ikke retten.',
@@ -117,13 +117,13 @@ async function route(request) {
     const menuId = Number.parseInt(b?.menu_id, 10);
     const courseId = b?.course_id == null || b.course_id === '' ? null : Number.parseInt(b.course_id, 10);
     const pairingId = b?.pairing_id == null || b.pairing_id === '' ? null : Number.parseInt(b.pairing_id, 10);
-    const stars = Number.parseInt(b?.stars, 10);
+    const stars = Math.round(Number.parseFloat(b?.stars) * 2) / 2;
     const client = String(b?.client_id || '');
     if (!Number.isFinite(menuId) || (courseId !== null && !Number.isFinite(courseId)) || (pairingId !== null && !Number.isFinite(pairingId)) || !/^[A-Za-z0-9_-]{8,64}$/.test(client)) {
       return json({ error: 'Ugyldig forespørsel.' }, 400, h);
     }
     try {
-      const [r] = await sql('SELECT api_rate($1, $2::bigint, $3::bigint, $4::bigint, $5::int, $6, $7) AS d', [
+      const [r] = await sql('SELECT api_rate($1, $2::bigint, $3::bigint, $4::bigint, $5::numeric, $6, $7) AS d', [
         client, String(menuId), courseId === null ? null : String(courseId),
         pairingId === null ? null : String(pairingId), String(stars),
         typeof b.comment === 'string' ? b.comment.slice(0, 500) : null,

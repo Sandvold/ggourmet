@@ -5,7 +5,7 @@ Menykortet ved bordet: dagens meny med viner, gjestenes vurderinger, vinene fra 
 ## Oppbygning
 
 - `public/` – den statiske nettsiden (ingen byggesteg). Netlify publiserer denne mappen, se `netlify.toml`.
-  - `index.html` – dagens meny; gjestene vurderer hver rett og hver vin (1–5)
+  - `index.html` – dagens meny; gjestene vurderer hver rett og hver vin (0,5–5 stjerner, halve trinn)
   - `arkiv.html` – tidligere menyer som kompakte menykort med vinene (`/arkiv`)
   - `viner.html` – vinene som er servert til menyene, fordelt på region, drue, land og farge (`/viner`)
   - `config.js` – adressen til API-et
@@ -21,7 +21,7 @@ Menykortet ved bordet: dagens meny med viner, gjestenes vurderinger, vinene fra 
 | GET | `/drunk` | Vinene fra menyene (`pairings`), én rad per vin per meny |
 | GET | `/menu/{id}` | Én meny |
 | GET | `/mine?client=…&menu=…` | Gjestens egne stjerner (for å vise dem igjen) |
-| POST | `/rate` | `{client_id, menu_id, course_id?, pairing_id?, stars, comment?, guest_name?}` – rett eller vin (pairing) |
+| POST | `/rate` | `{client_id, menu_id, course_id?, pairing_id?, stars (0.5–5, halve trinn), comment?, guest_name?}` – rett eller vin (pairing) |
 
 Hver gjest har én vurdering per rett og én per vin. En ny vurdering erstatter den forrige.
 

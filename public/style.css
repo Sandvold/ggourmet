@@ -113,25 +113,30 @@ main { flex: 1; width: 100%; }
 .vin .aar { white-space: nowrap; }
 .vin .opphav { display: block; color: var(--roeyk); font-weight: 400; font-size: var(--s--1); }
 
-/* ---------- Stjerner ---------- */
-.stjerner { display: inline-flex; gap: .1rem; margin-top: .8rem; border: 0; padding: 0; }
+/* ---------- Stjerner (halve trinn) ---------- */
+.stjerner { display: inline-flex; gap: 0; margin-top: .8rem; border: 0; padding: 0; }
 .stjerner legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.stjerne {
-  appearance: none; background: none; border: 0; padding: .35rem; cursor: pointer;
-  color: var(--messing-dim); line-height: 0; border-radius: 50%;
-  transition: color .15s ease, transform .15s ease;
+.stjerne { position: relative; display: block; padding: 5px; color: var(--messing-dim); line-height: 0; }
+.stjerne svg { width: 22px; height: 22px; display: block; }
+.stjerne > svg path { fill: none; stroke: currentColor; stroke-width: 1.3; }
+.stjerne .fyll { position: absolute; left: 5px; top: 5px; width: 0; height: 22px; overflow: hidden; color: var(--messing); pointer-events: none; }
+.stjerne .fyll svg path { fill: currentColor; stroke: currentColor; stroke-width: 1.3; }
+.stjerne.hel .fyll { width: 22px; }
+.stjerne.halv .fyll { width: 11px; }
+.stjerne.hel > svg, .stjerne.halv > svg { color: var(--messing); }
+.del {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  appearance: none; background: none; border: 0; padding: 0; margin: 0; cursor: pointer;
 }
-.stjerne svg { width: 20px; height: 20px; display: block; }
-.stjerne svg path { fill: none; stroke: currentColor; stroke-width: 1.3; transition: fill .15s ease; }
-.stjerne.pa { color: var(--messing); }
-.stjerne.pa svg path { fill: currentColor; }
-.stjerner:hover .stjerne { color: var(--messing); }
-.stjerner:hover .stjerne:hover ~ .stjerne { color: var(--messing-dim); }
-.stjerner:hover .stjerne:hover ~ .stjerne svg path { fill: none; }
-.stjerne:active { transform: scale(.88); }
+.del.v { left: 0; border-radius: 50% 0 0 50%; }
+.del.h { right: 0; border-radius: 0 50% 50% 0; }
+.del:focus-visible { outline: 2px solid var(--messing); outline-offset: -2px; }
 .stjerner.liten { margin-top: .3rem; }
-.stjerner.liten .stjerne { padding: .3rem; }
-.stjerner.liten .stjerne svg { width: 15px; height: 15px; }
+.stjerner.liten .stjerne { padding: 4px; }
+.stjerner.liten .stjerne svg { width: 16px; height: 16px; }
+.stjerner.liten .stjerne .fyll { left: 4px; top: 4px; height: 16px; }
+.stjerner.liten .stjerne.hel .fyll { width: 16px; }
+.stjerner.liten .stjerne.halv .fyll { width: 8px; }
 .stjerner[aria-busy="true"] { opacity: .6; pointer-events: none; }
 .status { display: block; min-height: 1.1em; font-size: var(--s--1); color: var(--roeyk); }
 .status.feil { color: var(--feil); }
@@ -188,7 +193,7 @@ main { flex: 1; width: 100%; }
 /* ---------- Vinene ---------- */
 .nokkeltall {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: 1rem;
   margin: 2rem 0 0;
 }
@@ -196,7 +201,12 @@ main { flex: 1; width: 100%; }
 .nokkeltall dt { color: var(--roeyk); font-size: var(--s--1); }
 .nokkeltall dd { margin: .3rem 0 0; font-size: var(--s-1); font-weight: 600; letter-spacing: -0.015em; line-height: 1.2; }
 
-.kontroller { display: flex; flex-wrap: wrap; gap: .75rem 1rem; margin: 2.5rem 0 1rem; }
+.kontroller { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .75rem 1rem; margin: 2.5rem 0 1rem; }
+.dd-sub { display: block; margin-top: .2rem; font-size: var(--s--1); font-weight: 400; color: var(--roeyk); letter-spacing: 0; }
+.s { color: var(--messing); }
+.stemmer { color: var(--roeyk); }
+.s-pris span + span { margin-left: .9rem; }
+.stolper .tom { text-align: left; margin: 1rem 0; }
 .valg { display: inline-flex; flex-wrap: wrap; gap: .4rem; }
 .valg button {
   appearance: none; background: none; color: var(--roeyk);
@@ -216,7 +226,7 @@ input[type="search"] {
 .stolper { list-style: none; margin: 0; padding: 0; }
 .stolpe {
   display: grid;
-  grid-template-columns: minmax(8rem, 13rem) 1fr 5rem 6.5rem;
+  grid-template-columns: minmax(8rem, 13rem) 1fr 7rem 9rem;
   align-items: center;
   gap: 1rem;
   padding: .55rem 0;
