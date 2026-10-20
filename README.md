@@ -30,7 +30,7 @@ Hver gjest har én vurdering per rett og én per vin. En ny vurdering erstatter 
 
 ## Hvilken meny vises som dagens meny?
 
-Menyen med `featured = true`. Hvis ingen er merket, viser forsiden «TBD» og alle menyene ligger i arkivet.
+Menyen med `featured = true`. Hvis ingen er merket, viser forsiden en nedtelling til `NESTE_KVELD` (satt i `public/config.js`, sammen med teksten under klokken), og alle menyene ligger i arkivet.
 
 ```sql
 UPDATE menus SET featured = (menu_no = 7);

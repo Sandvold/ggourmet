@@ -96,15 +96,33 @@
     let meny;
     try { meny = await hent("/today"); } catch (e) { return feilside(e.message); }
     if (!meny || !meny.id) {
+      const mal = new Date(window.NESTE_KVELD || "2026-11-21T18:00:00+01:00");
+      const merke = window.NESTE_KVELD_TEKST || "#Vinarv";
       main.innerHTML = `
         <article class="kort klar">
-          <header class="kort-hode">
-            <h1>TBD</h1>
-            <p class="dato">Neste meny er ikke satt ennå.</p>
-          </header>
+          <div class="nedtelling" role="timer" aria-live="off" aria-label="Tid igjen til neste kveld">
+            <div><span class="n-tall" id="n-d">0</span><span class="n-enhet">dager</span></div>
+            <div><span class="n-tall" id="n-t">00</span><span class="n-enhet">timer</span></div>
+            <div><span class="n-tall" id="n-m">00</span><span class="n-enhet">min</span></div>
+            <div><span class="n-tall" id="n-s">00</span><span class="n-enhet">sek</span></div>
+          </div>
+          <p class="n-merke">${esc(merke)}</p>
+          <p class="dato">${esc(new Intl.DateTimeFormat("nb-NO", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(mal))}</p>
           <span class="ruter-tegn" aria-hidden="true"></span>
           <p class="tbd-lenke"><a href="/arkiv">Se tidligere menyer</a></p>
         </article>`;
+      const felt = ["n-d", "n-t", "n-m", "n-s"].map((id) => document.getElementById(id));
+      const tikk = () => {
+        let igjen = Math.max(0, Math.floor((mal - Date.now()) / 1000));
+        const d = Math.floor(igjen / 86400); igjen %= 86400;
+        const t = Math.floor(igjen / 3600); igjen %= 3600;
+        const m = Math.floor(igjen / 60), sek = igjen % 60;
+        felt[0].textContent = d;
+        [t, m, sek].forEach((v, i) => { felt[i + 1].textContent = String(v).padStart(2, "0"); });
+        if (mal - Date.now() <= 0) { clearInterval(id); main.querySelector(".nedtelling").setAttribute("aria-label", "Kvelden er i gang"); }
+      };
+      const id = setInterval(tikk, 1000);
+      tikk();
       return;
     }
 

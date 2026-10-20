@@ -318,3 +318,17 @@ input[type="search"] {
 
 .tbd-lenke { margin: 0; font-size: var(--s--1); }
 .tbd-lenke a { color: var(--messing); text-underline-offset: 3px; }
+
+/* ---------- Nedtelling til neste kveld ---------- */
+.nedtelling {
+  display: flex; justify-content: center; gap: clamp(.75rem, 4vw, 2.25rem);
+  margin-top: clamp(1rem, 6vw, 3rem);
+}
+.nedtelling > div { display: flex; flex-direction: column; align-items: center; min-width: 3.2ch; }
+.n-tall {
+  font-size: var(--s-4); font-weight: 700; line-height: .95; letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.n-enhet { margin-top: .5rem; font-size: var(--s--1); color: var(--roeyk); }
+.n-merke { margin: 1.8rem 0 0; font-size: var(--s-2); font-weight: 600; letter-spacing: -0.01em; color: var(--messing); }
+.kort .dato:first-letter { text-transform: uppercase; }
