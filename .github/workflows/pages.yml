@@ -1,3 +1,4 @@
+# (kjøres på nytt etter at Pages ble slått på)
 # Publiserer public/ som nettside på GitHub Pages ved push til main.
 # Engangsoppsett: Settings → Pages → Source: «GitHub Actions».
 name: Publiser nettsiden (GitHub Pages)
