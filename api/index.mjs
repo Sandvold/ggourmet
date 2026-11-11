@@ -46,7 +46,7 @@ async function sql(query, params = []) {
 function cors(origin) {
   const allow = ALLOWED_ORIGIN === '*'
     ? '*'
-    : (ALLOWED_ORIGIN.split(',').map((s) => s.trim()).includes(origin) || /\.netlify\.app$/.test(origin || '') ? origin : ALLOWED_ORIGIN.split(',')[0]);
+    : (ALLOWED_ORIGIN.split(',').map((s) => s.trim()).includes(origin) || /\.(netlify\.app|github\.io)$/.test(origin || '') ? origin : ALLOWED_ORIGIN.split(',')[0]);
   return {
     'Access-Control-Allow-Origin': allow,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',

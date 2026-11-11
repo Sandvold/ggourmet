@@ -4,7 +4,7 @@ Menykortet ved bordet: dagens meny med viner, gjestenes vurderinger, vinene fra 
 
 ## Oppbygning
 
-- `public/` – den statiske nettsiden (ingen byggesteg). Netlify publiserer denne mappen, se `netlify.toml`.
+- `public/` – den statiske nettsiden (ingen byggesteg). GitHub Pages publiserer denne mappen (workflowen `.github/workflows/pages.yml`). `netlify.toml` er beholdt for bakoverkompatibilitet, men Netlify trengs ikke lenger.
   - `index.html` – dagens meny; gjestene vurderer hver rett og hver vin (0,5–5 stjerner, halve trinn)
   - `arkiv.html` – tidligere menyer som kompakte menykort med vinene (`/arkiv`)
   - `viner.html` – vinene som er servert til menyene, fordelt på region, drue, land og farge (`/viner`)

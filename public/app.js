@@ -109,7 +109,7 @@
           <p class="n-merke">${esc(merke)}</p>
           <p class="dato">${esc(new Intl.DateTimeFormat("nb-NO", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(mal))}</p>
           <span class="ruter-tegn" aria-hidden="true"></span>
-          <p class="tbd-lenke"><a href="/arkiv">Se tidligere menyer</a></p>
+          <p class="tbd-lenke"><a href="arkiv.html">Se tidligere menyer</a></p>
         </article>`;
       const felt = ["n-d", "n-t", "n-m", "n-s"].map((id) => document.getElementById(id));
       const tikk = () => {
