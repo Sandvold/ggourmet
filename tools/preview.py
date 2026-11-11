@@ -48,6 +48,39 @@ TODAY = {
     ],
 }
 
+def _k(cid, pos, typ, dish, desc, wines):
+    d = rett(cid, pos, dish, wines)
+    d["course_type"], d["description"] = typ, desc
+    return d
+
+
+UPCOMING = {
+    "id": 8, "menu_no": 8, "title": "Vinarv", "event_date": "2026-11-21", "occasion": None,
+    "intro": "Tapas-middag for ti, fra den arvede kjelleren: to hvite flighter og tre røde akter.",
+    "rating": {"avg": None, "count": 0},
+    "courses": [
+        _k(1, 1, "Hvit · flight 1: fisk", "Sashimi av yellowtail", "Tynne skiver yellowtail med lys soya, lime eller yuzu, vårløk og ingefær.",
+           [{"name": "Chablis (magnum)", "vintage": 1996, "region": "Chablis", "country": "France", "appellation": None}]),
+        _k(2, 2, "Hvit · flight 1: fisk", "Crudo og miso-dashi", "Crudo av kamskjell eller kveite med grapefrukt, pasjonsfrukt og chili, og miso-dashi med tynne skiver kveite.",
+           [{"name": "Koehler-Ruprecht Kabinett Trocken", "vintage": 2007, "region": "Pfalz", "country": "Germany", "appellation": None}]),
+        _k(3, 3, "Hvit · flight 2: Pessac-Léognan", "Skinke og ost", "San Daniele og ibérico bellota; Comté, Parmigiano og Ossau-Iraty, med honning og valnøtter.",
+           [{"name": "Château La Louvière Blanc", "vintage": 1995, "region": "Pessac-Léognan", "country": "France", "appellation": None},
+            {"name": "Château Smith Haut Lafitte Blanc", "vintage": 1999, "region": "Pessac-Léognan", "country": "France", "appellation": None},
+            {"name": "Koehler-Ruprecht Saumagen", "vintage": 2007, "region": "Pfalz", "country": "Germany", "appellation": None}]),
+        _k(4, 4, "Rød · akt 1: Burgund", "Secreto ibérico", "Med jordskokkpuré, stekt sopp og karamellisert pære.",
+           [{"name": "Patrice Rion Chambolle-Musigny Les Cras 1er Cru", "vintage": 2000, "region": "Burgundy", "country": "France", "appellation": None},
+            {"name": "Patrice Rion Vosne-Romanée", "vintage": 1999, "region": "Burgundy", "country": "France", "appellation": None}]),
+        _k(5, 5, "Rød · akt 2: Bordeaux og California", "Côte de bœuf", "Med samme tilbehør. Ridge Monte Bello skjenkes til slutt, gjerne uten mat.",
+           [{"name": "Château Camensac", "vintage": 2000, "region": "Haut-Médoc", "country": "France", "appellation": None},
+            {"name": "Connétable Talbot", "vintage": 1996, "region": "Bordeaux", "country": "France", "appellation": None},
+            {"name": "Ridge Monte Bello", "vintage": None, "region": "Santa Cruz Mountains", "country": "USA", "appellation": None}]),
+        _k(6, 6, "Rød · akt 3: Piemonte", "Resten av oksen med Parmigiano", "Parmigiano-flak og stekt sopp.",
+           [{"name": "Produttori del Barbaresco Ovello Riserva", "vintage": 1996, "region": "Piedmont", "country": "Italy", "appellation": None}]),
+        _k(7, 7, "Dessert", "Mild blåmuggost med honning og valnøtt", "Gorgonzola dolce eller Bleu d'Auvergne.",
+           [{"name": "Dr. Loosen Ürziger Würzgarten Auslese", "vintage": 1995, "region": "Mosel", "country": "Germany", "appellation": None}]),
+    ],
+}
+
 ARKIV = [
     {"id": 5, "menu_no": 5, "title": "Meny 5", "event_date": "2023-08-26", "rating": {"avg": 4.6, "count": 5},
      "courses": [rett(11, 1, "Halloumi, fersken og serrano", [VIN["champagne"]], {"avg": 4.5, "count": 4}),
@@ -89,7 +122,7 @@ def lag_handler(tbd):
             sti = urllib.parse.urlparse(self.path).path
             if sti == "/config.js":
                 return self.svar(b'window.GOURMET_API="/api";', typ="text/javascript")
-            api = {"/api/today": None if tbd else TODAY, "/api/archive": ARKIV, "/api/drunk": DRUKKET,
+            api = {"/api/today": None if tbd else TODAY, "/api/archive": ARKIV, "/api/upcoming": UPCOMING, "/api/drunk": DRUKKET,
                    "/api/mine": {"1": 4.5, "502": 3.5}}
             if sti in api:
                 return self.svar(api[sti])

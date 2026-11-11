@@ -332,3 +332,12 @@ input[type="search"] {
 .n-enhet { margin-top: .5rem; font-size: var(--s--1); color: var(--roeyk); }
 .n-merke { margin: 1.8rem 0 0; font-size: var(--s-2); font-weight: 600; letter-spacing: -0.01em; color: var(--messing); }
 .kort .dato:first-letter { text-transform: uppercase; }
+
+/* Kommende meny under nedtellingen */
+.kommende-meny { margin-top: 2.5rem; }
+.kommende-meny .kort-hode .type { display: block; font-size: var(--s--1); color: var(--messing); letter-spacing: .08em; text-transform: uppercase; margin: 0 0 .4rem; }
+.kommende-meny li.flight { list-style: none; margin: 2.2rem 0 .2rem; text-align: center; }
+.kommende-meny li.flight h2 { margin: 0; font-size: var(--s--1); font-weight: 600; color: var(--messing); letter-spacing: .06em; text-transform: uppercase; }
+.kommende-meny .rett.kommende h3 { margin: 0; font-size: var(--s-1); font-weight: 600; text-align: center; text-wrap: balance; }
+.kommende-meny .rett + .rett::before { display: none; }
+.kommende-meny .rett.kommende { padding: .9rem 0 .3rem; }

@@ -91,6 +91,37 @@
   }
   const vinNavn = (w) => `${esc(w.name)}${w.vintage ? ` <span class="aar">${esc(w.vintage)}</span>` : ""}`;
 
+
+  // ---------- Kommende meny (vises under nedtellingen, uten vurdering) ----------
+  async function kommendeMeny() {
+    let m;
+    try { m = await hent("/upcoming"); } catch { return; }
+    if (!m || !m.id || !(m.courses || []).length) return;
+    let forrige = null;
+    const deler = m.courses.map((c) => {
+      const ny = c.course_type && c.course_type !== forrige;
+      forrige = c.course_type;
+      return `${ny ? `<li class="flight"><h2>${esc(c.course_type)}</h2></li>` : ""}
+        <li class="rett kommende">
+          <h3>${esc(c.dish)}</h3>
+          ${c.description ? `<p class="beskrivelse">${esc(c.description)}</p>` : ""}
+          ${(c.wines || []).map((w) => `<p class="vin">${vinNavn(w)}${opphav(w) ? `<span class="opphav">${esc(opphav(w))}</span>` : ""}</p>`).join("")}
+        </li>`;
+    }).join("");
+    const kort = document.createElement("article");
+    kort.className = "kort klar kommende-meny";
+    kort.innerHTML = `
+      <header class="kort-hode">
+        <p class="type">Neste meny</p>
+        <h1>${esc(m.title)}</h1>
+        ${m.event_date ? `<p class="dato">${esc(dato(m.event_date))}</p>` : ""}
+        ${m.intro ? `<p class="intro">${esc(m.intro)}</p>` : ""}
+      </header>
+      <span class="ruter-tegn" aria-hidden="true"></span>
+      <ol class="retter">${deler}</ol>`;
+    main.appendChild(kort);
+  }
+
   // ---------- Dagens meny ----------
   async function dagensMeny() {
     let meny;
@@ -111,6 +142,7 @@
           <span class="ruter-tegn" aria-hidden="true"></span>
           <p class="tbd-lenke"><a href="arkiv.html">Se tidligere menyer</a></p>
         </article>`;
+      kommendeMeny();
       const felt = ["n-d", "n-t", "n-m", "n-s"].map((id) => document.getElementById(id));
       const tikk = () => {
         let igjen = Math.max(0, Math.floor((mal - Date.now()) / 1000));

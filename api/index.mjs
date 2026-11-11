@@ -89,6 +89,10 @@ async function route(request) {
       const [r] = await sql('SELECT api_today() AS d');
       return json(r.d, 200, h, 'public, max-age=30');
     }
+    if (path === '/upcoming') {
+      const [r] = await sql('SELECT api_upcoming() AS d');
+      return json(r.d, 200, h, 'public, max-age=60');
+    }
     if (path === '/archive') {
       const [r] = await sql('SELECT api_archive() AS d');
       return json(r.d, 200, h, 'public, max-age=60');
