@@ -98,7 +98,8 @@ main { flex: 1; width: 100%; }
   transform: rotate(45deg);
 }
 .rett .type { display: block; font-size: var(--s--1); color: var(--messing); margin-bottom: .35rem; }
-.rett h2 {
+.rett h2,
+.rett .rettnavn {
   margin: 0;
   font-size: var(--s-2);
   font-weight: 600;
@@ -341,3 +342,7 @@ input[type="search"] {
 .kommende-meny .rett.kommende h3 { margin: 0; font-size: var(--s-1); font-weight: 600; text-align: center; text-wrap: balance; }
 .kommende-meny .rett + .rett::before { display: none; }
 .kommende-meny .rett.kommende { padding: .9rem 0 .3rem; }
+
+/* Flight-overskrifter i vurderingsvisningen */
+.retter li.flight { list-style: none; margin: 2.4rem 0 .6rem; text-align: center; }
+.retter li.flight h2 { margin: 0; font-size: var(--s--1); font-weight: 600; color: var(--messing); letter-spacing: .06em; text-transform: uppercase; }

@@ -163,19 +163,31 @@
     try { mine = await hent(`/mine?client=${klient}&menu=${meny.id}`); } catch {}
     document.title = `${meny.title} – Guldberglia`;
 
-    const retter = (meny.courses || []).map((c) => `
+    // Hver vin vurderes bare én gang: står samme vin under flere retter, får bare første forekomst stjerner.
+    const sett = new Set();
+    const vinNokkel = (w) => `${String(w.name).toLowerCase()}|${w.vintage ?? ""}`;
+    let forrigeType = null;
+    const retter = (meny.courses || []).map((c) => {
+      const nyFlight = c.course_type && c.course_type !== forrigeType;
+      forrigeType = c.course_type;
+      return `${nyFlight ? `<li class="flight"><h2>${esc(c.course_type)}</h2></li>` : ""}
       <li class="rett">
-        ${c.course_type ? `<span class="type">${esc(c.course_type)}</span>` : ""}
-        <h2>${esc(c.dish)}</h2>
+        <h3 class="rettnavn">${esc(c.dish)}</h3>
         ${c.description ? `<p class="beskrivelse">${esc(c.description)}</p>` : ""}
         ${stjerner(String(c.id), `Din vurdering av ${c.dish}`, Number(mine[c.id] || 0))}
         <span class="status" aria-live="polite"></span>
-        ${(c.wines || []).map((w) => `<div class="vinblokk">
+        ${(c.wines || []).map((w) => {
+          const nokkel = vinNokkel(w);
+          const gjentatt = sett.has(nokkel);
+          sett.add(nokkel);
+          return `<div class="vinblokk">
           <p class="vin">${vinNavn(w)}${opphav(w) ? `<span class="opphav">${esc(opphav(w))}</span>` : ""}</p>
-          ${w.id ? `${stjerner("w" + w.id, `Din vurdering av vinen ${w.name}`, Number(mine["w" + w.id] || 0), true)}
+          ${gjentatt ? `<p class="opphav">Vurderes under den første retten</p>` : w.id ? `${stjerner("w" + w.id, `Din vurdering av vinen ${w.name}`, Number(mine["w" + w.id] || 0), true)}
           <span class="status" aria-live="polite"></span>` : ""}
-        </div>`).join("")}
-      </li>`).join("");
+        </div>`;
+        }).join("")}
+      </li>`;
+    }).join("");
 
     const datoTekst = dato(meny.event_date);
     main.innerHTML = `

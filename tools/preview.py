@@ -162,9 +162,13 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--ut", default="preview-out", help="mappe for skjermbildene")
     ap.add_argument("--tbd", action="store_true", help="vis forsiden uten dagens meny")
+    ap.add_argument("--vinarv", action="store_true", help="bruk Vinarv (flighter) som dagens meny")
     ap.add_argument("--serve", action="store_true", help="bare start serveren")
     args = ap.parse_args()
 
+    global TODAY
+    if args.vinarv:
+        TODAY = UPCOMING
     server = http.server.ThreadingHTTPServer(("127.0.0.1", PORT), lag_handler(args.tbd))
     if args.serve:
         print(f"Forhåndsvisning på http://127.0.0.1:{PORT} (Ctrl+C for å stoppe)")
